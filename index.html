@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+    /* Red Hat Brand Colors */
+    :root {
+        --rh-red: #EE0000;
+        --rh-black: #000000;
+        --rh-dark-gray: #151515;
+        --rh-light-gray: #F0F0F0;
+        --rh-medium-gray: #D2D2D2;
+        --text-main: #151515;
+        --text-muted: #6a6e73;
+    }
+
+    * {
+        box-sizing: border-box;
+        /* Using Red Hat's preferred font stack style */
+        font-family: 'RedHatText', 'Overpass', 'Open Sans', Helvetica, Arial, sans-serif;
+    }
+
+    body {
+        margin: 0;
+        padding: 20px;
+        background-color: var(--rh-light-gray);
+    }
+
+    .widget-container {
+        background-color: #fff;
+        border-radius: 0; /* Red Hat often uses sharper corners */
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        overflow: hidden;
+        max-width: 100%;
+        border: 1px solid var(--rh-medium-gray);
+    }
+
+    /* Header Section */
+    .widget-header {
+        background-color: var(--rh-black);
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 4px solid var(--rh-red);
+    }
+
+    .widget-header h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-pill {
+        background-color: var(--rh-red);
+        color: white;
+        font-size: 11px;
+        padding: 2px 10px;
+        border-radius: 2px;
+        font-weight: 700;
+    }
+
+    /* Task List */
+    .task-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+    .task-item {
+        border-bottom: 1px solid var(--rh-light-gray);
+        padding: 15px 20px;
+        transition: background-color 0.2s;
+    }
+
+    .task-item:hover {
+        background-color: #fafafa;
+    }
+
+    .task-main-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    /* Custom Checkbox */
+    .checkbox-wrapper {
+        position: relative;
+        top: 2px;
+        cursor: pointer;
+    }
+    
+    .custom-checkbox {
+        width: 18px;
+        height: 18px;
+        border: 2px solid var(--rh-black);
+        border-radius: 0; /* Squared off for RH brand */
+        display: inline-block;
+        position: relative;
+    }
+
+    .task-item.completed .custom-checkbox {
+        background-color: var(--rh-black);
+        border-color: var(--rh-black);
+    }
+
+    .task-item.completed .custom-checkbox::after {
+        content: '✔';
+        position: absolute;
+        color: white;
+        font-size: 12px;
+        top: -1px;
+        left: 2px;
+    }
+
+    .task-content {
+        flex: 1;
+    }
+
+    .task-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--rh-black);
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    .task-item.completed .task-title {
+        text-decoration: line-through;
+        color: var(--rh-medium-gray);
+    }
+
+    .task-meta {
+        font-size: 11px;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Tags and Badges */
+    .tag {
+        padding: 2px 6px;
+        border-radius: 2px;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 10px;
+    }
+
+    .tag-jira {
+        background-color: var(--rh-light-gray);
+        color: var(--rh-black);
+        border: 1px solid var(--rh-medium-gray);
+    }
+
+    .tag-gov {
+        background-color: var(--rh-black);
+        color: white;
+    }
+
+    .priority-high {
+        color: var(--rh-red);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-weight: 700;
+    }
+    
+    .priority-high::before {
+        content: '';
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background-color: var(--rh-red);
+        border-radius: 0;
+    }
+
+    /* Actions */
+    .action-btn {
+        background: none;
+        border: none;
+        color: var(--rh-red);
+        font-size: 11px;
+        cursor: pointer;
+        padding: 0;
+        margin-left: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        display: none;
+    }
+
+    .task-item:hover .action-btn {
+        display: inline-block;
+    }
+
+    /* Note Section */
+    .note-input-container {
+        margin-top: 10px;
+        margin-left: 30px;
+        display: none;
+    }
+
+    .note-input-container.active {
+        display: block;
+    }
+
+    .note-textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid var(--rh-medium-gray);
+        border-radius: 0;
+        font-size: 12px;
+        resize: vertical;
+        min-height: 60px;
+        outline: none;
+    }
+
+    .note-textarea:focus {
+        border-color: var(--rh-red);
+    }
+
+    .save-note-btn {
+        background-color: var(--rh-dark-gray);
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 0;
+        font-size: 11px;
+        margin-top: 5px;
+        cursor: pointer;
+        text-transform: uppercase;
+        font-weight: 700;
+    }
+    
+    .save-note-btn:hover {
+        background-color: var(--rh-red);
+    }
+
+    .saved-notes-list {
+        margin-top: 8px;
+        margin-left: 30px;
+    }
+
+    .saved-note {
+        background-color: var(--rh-light-gray);
+        border-left: 3px solid var(--rh-red);
+        padding: 8px 12px;
+        font-size: 12px;
+        color: var(--rh-black);
+        margin-bottom: 5px;
+    }
+
+    .saved-note span {
+        font-size: 10px;
+        color: var(--text-muted);
+        display: block;
+        margin-bottom: 2px;
+        font-weight: 700;
+    }
+
+</style>
+</head>
+<body>
+
+<div class="widget-container">
+    <header class="widget-header">
+        <h3>Action Items <span class="status-pill" id="count-pill">5 Pending</span></h3>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EE0000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+    </header>
+
+    <ul class="task-list">
+        <li class="task-item" id="task-1">
+            <div class="task-main-row">
+                <div class="checkbox-wrapper" onclick="toggleTask('task-1')">
+                    <div class="custom-checkbox"></div>
+                </div>
+                <div class="task-content">
+                    <span class="task-title">Fix Login Timeout on Proctor App</span>
+                    <div class="task-meta">
+                        <span class="tag tag-jira">JIRA-402</span>
+                        <span class="priority-high">High Priority</span>
+                        <button class="action-btn" onclick="toggleNoteBox('task-1')">+ Add Note</button>
+                    </div>
+                </div>
+            </div>
+            <div class="note-input-container">
+                <textarea class="note-textarea" placeholder="Type your update here..."></textarea>
+                <button class="save-note-btn" onclick="saveNote('task-1')">Save Update</button>
+            </div>
+            <div class="saved-notes-list"></div>
+        </li>
+
+        <li class="task-item" id="task-2">
+            <div class="task-main-row">
+                <div class="checkbox-wrapper" onclick="toggleTask('task-2')">
+                    <div class="custom-checkbox"></div>
+                </div>
+                <div class="task-content">
+                    <span class="task-title">Video Stream Latency Spikes</span>
+                    <div class="task-meta">
+                        <span class="tag tag-jira">ADO-119</span>
+                        <span class="priority-high">High Priority</span>
+                        <button class="action-btn" onclick="toggleNoteBox('task-2')">+ Add Note</button>
+                    </div>
+                </div>
+            </div>
+            <div class="note-input-container">
+                <textarea class="note-textarea" placeholder="Type your update here..."></textarea>
+                <button class="save-note-btn" onclick="saveNote('task-2')">Save Update</button>
+            </div>
+            <div class="saved-notes-list"></div>
+        </li>
+
+        <li class="task-item" id="task-3">
+            <div class="task-main-row">
+                <div class="checkbox-wrapper" onclick="toggleTask('task-3')">
+                    <div class="custom-checkbox"></div>
+                </div>
+                <div class="task-content">
+                    <span class="task-title">Mobile Responsive Header Break</span>
+                    <div class="task-meta">
+                        <span class="tag tag-jira">JIRA-405</span>
+                        <span class="priority-high">High Priority</span>
+                        <button class="action-btn" onclick="toggleNoteBox('task-3')">+ Add Note</button>
+                    </div>
+                </div>
+            </div>
+            <div class="note-input-container">
+                <textarea class="note-textarea" placeholder="Type your update here..."></textarea>
+                <button class="save-note-btn" onclick="saveNote('task-3')">Save Update</button>
+            </div>
+            <div class="saved-notes-list"></div>
+        </li>
+
+        <li class="task-item" id="task-4">
+            <div class="task-main-row">
+                <div class="checkbox-wrapper" onclick="toggleTask('task-4')">
+                    <div class="custom-checkbox"></div>
+                </div>
+                <div class="task-content">
+                    <span class="task-title">Q1 Security Compliance Review</span>
+                    <div class="task-meta">
+                        <span class="tag tag-gov">Governance</span>
+                        <span style="color:var(--rh-black); font-weight: 600;">Pending Approval</span>
+                        <button class="action-btn" onclick="toggleNoteBox('task-4')">+ Add Note</button>
+                    </div>
+                </div>
+            </div>
+            <div class="note-input-container">
+                <textarea class="note-textarea" placeholder="Reason for approval/rejection..."></textarea>
+                <button class="save-note-btn" onclick="saveNote('task-4')">Log Decision</button>
+            </div>
+            <div class="saved-notes-list"></div>
+        </li>
+
+        <li class="task-item" id="task-5">
+            <div class="task-main-row">
+                <div class="checkbox-wrapper" onclick="toggleTask('task-5')">
+                    <div class="custom-checkbox"></div>
+                </div>
+                <div class="task-content">
+                    <span class="task-title">Vendor API Access Request</span>
+                    <div class="task-meta">
+                        <span class="tag tag-gov">Governance</span>
+                        <span style="color:var(--rh-black); font-weight: 600;">Pending Approval</span>
+                        <button class="action-btn" onclick="toggleNoteBox('task-5')">+ Add Note</button>
+                    </div>
+                </div>
+            </div>
+            <div class="note-input-container">
+                <textarea class="note-textarea" placeholder="Reason for approval/rejection..."></textarea>
+                <button class="save-note-btn" onclick="saveNote('task-5')">Log Decision</button>
+            </div>
+            <div class="saved-notes-list"></div>
+        </li>
+    </ul>
+</div>
+
+<script>
+    function toggleTask(taskId) {
+        const item = document.getElementById(taskId);
+        item.classList.toggle('completed');
+        updateCount();
+    }
+
+    function toggleNoteBox(taskId) {
+        const item = document.getElementById(taskId);
+        const noteBox = item.querySelector('.note-input-container');
+        
+        if (noteBox.classList.contains('active')) {
+            noteBox.classList.remove('active');
+        } else {
+            noteBox.classList.add('active');
+            item.querySelector('textarea').focus();
+        }
+    }
+
+    function saveNote(taskId) {
+        const item = document.getElementById(taskId);
+        const textarea = item.querySelector('textarea');
+        const text = textarea.value.trim();
+        const savedList = item.querySelector('.saved-notes-list');
+
+        if (text) {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const noteDiv = document.createElement('div');
+            noteDiv.className = 'saved-note';
+            noteDiv.innerHTML = `<span>LOGGED AT ${timeString}</span>${text}`;
+            savedList.appendChild(noteDiv);
+            textarea.value = '';
+            toggleNoteBox(taskId);
+        }
+    }
+
+    function updateCount() {
+        const total = document.querySelectorAll('.task-item').length;
+        const completed = document.querySelectorAll('.task-item.completed').length;
+        const pending = total - completed;
+        
+        const pill = document.getElementById('count-pill');
+        if (pending === 0) {
+            pill.textContent = "COMPLETED";
+            pill.style.backgroundColor = "#2e7d32"; // Darker green for "success" state
+        } else {
+            pill.textContent = `${pending} PENDING`;
+            pill.style.backgroundColor = "var(--rh-red)";
+        }
+    }
+</script>
+
+</body>
+</html>
